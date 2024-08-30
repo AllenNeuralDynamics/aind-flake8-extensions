@@ -15,13 +15,6 @@ class PydanticFieldChecker(ast.NodeVisitor):
         self.check_field(node)
         self.generic_visit(node)
 
-    # .AnnAssign(target=Name(id='name', ctx=Store(), lineno=5, col_offset=4, end_lineno=5, end_col_offset=8),
-    # annotation=Name(id='str', ctx=Load(), lineno=5, col_offset=10, end_lineno=5, end_col_offset=13),
-    # value=Call(func=Name(id='Field', ctx=Load(), lineno=5, col_offset=16, end_lineno=5, end_col_offset=21),
-    # args=[],
-    # keywords=[], lineno=5, col_offset=16, end_lineno=5, end_col_offset=23),
-    # simple=1, lineno=5, col_offset=4, end_lineno=5, end_col_offset=23)
-
     def check_field(self, node: ast.AnnAssign) -> None:
         if (
             isinstance(node.value, ast.Call)
@@ -62,7 +55,21 @@ class PydanticFieldChecker(ast.NodeVisitor):
                             not isinstance(first_arg, ast.Constant)
                             or first_arg.value is not Ellipsis
                         ):
+                            # this is okay, not an issue
                             pass
+                    elif node.value.keywords:
+                        # check if the first keyword is default, that's fine
+                        if node.value.keywords[0].arg == 'default':
+                            pass
+                        else:
+                            self.issues.append(
+                                (
+                                    node.lineno,
+                                    node.col_offset,
+                                    f"PF002 Field '{field_name}' should use '...' for required fields",
+                                    type(self),
+                                )
+                            )
                     else:
                         # No arguments provided, defaulting to required field check
                         self.issues.append(

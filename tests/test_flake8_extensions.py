@@ -2,13 +2,14 @@ import ast
 import unittest
 from aind_flake8_extensions.plugin import run_ast_checks
 
+
 class TestPydanticFieldChecker(unittest.TestCase):
-    
+
     def check_code(self, code: str):
         """Helper method to run the PydanticFieldChecker on the provided code."""
         tree = ast.parse(code)
         return list(run_ast_checks(tree))
-    
+
     def test_optional_field_missing_default(self):
         code = """
 from pydantic import BaseModel, Field
@@ -30,7 +31,7 @@ class MyModel(BaseModel):
         errors = self.check_code(code)
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors[0][2], "PF002 Field 'name' should use '...' for required fields")
-    
+
     def test_required_field_no_args(self):
         code = """
 from pydantic import BaseModel, Field
@@ -112,6 +113,17 @@ class MyModel(BaseModel):
 """
         errors = self.check_code(code)
         self.assertEqual(len(errors), 0)
+
+    def test_correct_required_default_set(self):
+        code = """
+from pydantic import BaseModel
+
+class MyModel(BaseModel):
+    stimulus_devices: List[int] = Field(default=[])
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
