@@ -3,7 +3,7 @@ import unittest
 from aind_flake8_extensions.plugin import run_ast_checks
 
 
-class TestPydanticFieldChecker(unittest.TestCase):
+class TestPlugin(unittest.TestCase):
 
     def check_code(self, code: str):
         """Helper method to run the PydanticFieldChecker on the provided code."""
@@ -16,6 +16,17 @@ from pydantic import BaseModel, Field
 
 class MyModel(BaseModel):
     name: Optional[str] = Field(None, description="Name of the user")
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0][2], "PF001 Field 'name' should use 'default=None' for optional fields")
+
+    def test_optional_no_field(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: Optional[str]
 """
         errors = self.check_code(code)
         self.assertEqual(len(errors), 1)
