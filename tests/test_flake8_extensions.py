@@ -148,6 +148,13 @@ class MyModel(BaseModel):
         errors = self.check_code(code)
         self.assertEqual(len(errors), 0)
 
-
+    def test_correct_required_ellipsis(self):
+        code = """
+class CoordinateTransform(AindModel):
+    type: str = Field(..., title="transformation type")
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+        
 if __name__ == '__main__':
     unittest.main()

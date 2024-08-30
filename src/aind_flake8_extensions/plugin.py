@@ -136,6 +136,7 @@ class PydanticDefaultChecker(ast.NodeVisitor):
                     self.check_field_required(node)
         else:
             # Handle missing Field case for required fields
+            # if isinstance(node.target, )
             if isinstance(node.target, ast.Name):
                 field_name = node.target.id
                 type_annotation = node.annotation
@@ -147,12 +148,19 @@ class PydanticDefaultChecker(ast.NodeVisitor):
                     and type_annotation.value.id == "Optional"
                 )
 
-                if is_optional:
-                    # Optional fields should have Field(default=None) at a minimum
-                    self.error_no_default(node)
-                else:
-                    # Required fields should have the ellipsis in Field
-                    self.error_no_ellipsis(node)
+                is_literal = (
+                    isinstance(type_annotation, ast.Subscript)
+                    and isinstance(type_annotation.value, ast.Name)
+                    and type_annotation.value.id == "Literal"
+                )
+
+                if not is_literal:
+                    if is_optional:
+                        # Optional fields should have Field(default=None) at a minimum
+                        self.error_no_default(node)
+                    else:
+                        # Required fields should have the ellipsis in Field
+                        self.error_no_ellipsis(node)
 
 
 def run_ast_checks(
