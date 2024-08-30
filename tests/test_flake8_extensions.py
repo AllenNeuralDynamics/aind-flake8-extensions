@@ -31,6 +31,38 @@ class MyModel(BaseModel):
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors[0][2], "PF002 Field 'name' should use '...' for required fields")
     
+    def test_required_field_no_args(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: str = Field()
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0][2], "PF002 Field 'name' should use '...' for required fields")
+
+    def test_correct_required_with_value(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: str = Field("value")
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+
+    def test_required_field_blank(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: str
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0][2], "PF002 Field 'name' should use '...' for required fields")
+
     def test_correct_optional_field(self):
         code = """
 from pydantic import BaseModel, Field
@@ -41,12 +73,32 @@ class MyModel(BaseModel):
         errors = self.check_code(code)
         self.assertEqual(len(errors), 0)
 
+    def test_correct_required_field_with_args(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: str = Field(..., title="blank", description="Name of the user")
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+
     def test_correct_required_field(self):
         code = """
 from pydantic import BaseModel, Field
 
 class MyModel(BaseModel):
-    name: str = Field(..., description="Name of the user")
+    name: str = Field(...)
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+
+    def test_correct_required_field_args(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    name: str = Field(..., description="Description")
 """
         errors = self.check_code(code)
         self.assertEqual(len(errors), 0)
