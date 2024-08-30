@@ -4,3 +4,7 @@ exclude =
     __pycache__,
     build
 max-complexity = 10
+
+[flake8:local-plugins]
+extension =
+    PF = aind_flake8_extensions.plugin:run_ast_checks
