@@ -48,15 +48,15 @@ class PydanticDefaultChecker(ast.NodeVisitor):
             )
         )
 
-    def error_no_ellipsis(self, node: ast.AnnAssign):
-        self.issues.append(
-            (
-                node.lineno,
-                node.col_offset,
-                f"PF002 Field '{node.target.id}' should use '...' for required fields",
-                type(self),
-            )
-        )
+    # def error_no_ellipsis(self, node: ast.AnnAssign):
+    #     self.issues.append(
+    #         (
+    #             node.lineno,
+    #             node.col_offset,
+    #             f"PF002 Field '{node.target.id}' should use '...' for required fields",
+    #             type(self),
+    #         )
+    #     )
 
     def check_field_optional(self, node: ast.AnnAssign) -> None:
         """Check fields in each node to see if they match the format:
@@ -70,8 +70,6 @@ class PydanticDefaultChecker(ast.NodeVisitor):
         node : ast.AnnAssign
             Node to check
         """
-        field_name = node.target.id
-
         if not any(kw.arg == "default" for kw in node.value.keywords):
             self.error_no_default(node)
 
@@ -88,21 +86,20 @@ class PydanticDefaultChecker(ast.NodeVisitor):
         node : ast.AnnAssign
             Node to check
         """
-        field_name = node.target.id
+        pass
+        # if node.value.args:
+        #     # Check if there are arguments with no keywords, fail if they aren't an ellipsis
+        #     first_arg = node.value.args[0]
+        #     if not isinstance(first_arg, ast.Constant) or first_arg.value is not Ellipsis:
+        #         self.error_no_ellipsis
+        # elif node.value.keywords:
+        #     # Check if the first keyword is 'default'; that's fine, they passed a value
+        #     if not node.value.keywords[0].arg == 'default':
+        #         self.error_no_ellipsis(node)
 
-        if node.value.args:
-            # Check if there are arguments with no keywords, fail if they aren't an ellipsis
-            first_arg = node.value.args[0]
-            if not isinstance(first_arg, ast.Constant) or first_arg.value is not Ellipsis:
-                self.error_no_ellipsis
-        elif node.value.keywords:
-            # Check if the first keyword is 'default'; that's fine, they passed a value
-            if not node.value.keywords[0].arg == 'default':
-                self.error_no_ellipsis(node)
-
-        else:
-            # No arguments provided, defaulting to required field check
-            self.error_no_ellipsis(node)
+        # else:
+        #     # No arguments provided, defaulting to required field check
+        #     self.error_no_ellipsis(node)
 
     def check_field(self, node: ast.AnnAssign) -> None:
         """Check fields to see if they match our default/ellipsis criteria
