@@ -49,14 +49,15 @@ class PydanticDefaultChecker(ast.NodeVisitor):
         )
 
     def error_no_ellipsis(self, node: ast.AnnAssign):
-        self.issues.append(
-            (
-                node.lineno,
-                node.col_offset,
-                f"PF002 Field '{node.target.id}' should use '...' for required fields",
-                type(self),
-            )
-        )
+        pass
+        # self.issues.append(
+        #     (
+        #         node.lineno,
+        #         node.col_offset,
+        #         f"PF002 Field '{node.target.id}' should use '...' for required fields",
+        #         type(self),
+        #     )
+        # )
 
     def check_field_optional(self, node: ast.AnnAssign) -> None:
         """Check fields in each node to see if they match the format:
