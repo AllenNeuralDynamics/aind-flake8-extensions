@@ -182,7 +182,7 @@ class PydanticDefaultChecker(ast.NodeVisitor):
 
         # check to see if the type of this assignment is set to datetime
         type_annotation = node.annotation
-        if type_annotation.id == "datetime":
+        if hasattr(type_annotation, 'id') and type_annotation.id == "datetime":
             self.error_datetime(node)
 
 

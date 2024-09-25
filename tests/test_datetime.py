@@ -21,6 +21,16 @@ class MyModel(BaseModel):
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors[0][2], "PF003 Field 'timestamp' should use 'AwareDatetimeWithDefault' instead of datetime")
 
+    def test_datetime_correct(self):
+        code = """
+from pydantic import BaseModel, Field
+
+class MyModel(BaseModel):
+    timestamp: AwareDatetimeWithDefault = Field(...)
+"""
+        errors = self.check_code(code)
+        self.assertEqual(len(errors), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
