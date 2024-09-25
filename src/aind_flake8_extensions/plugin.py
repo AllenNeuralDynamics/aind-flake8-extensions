@@ -35,7 +35,8 @@ class PydanticDefaultChecker(ast.NodeVisitor):
         node : ast.AnnAssign
             annotated assign node
         """
-        self.check_field(node)
+        self.check_PF001_default_equals(node)
+        self.check_PF003_aware_datetime(node)
         self.generic_visit(node)
 
     def error_no_default(self, node: ast.AnnAssign):
@@ -44,6 +45,16 @@ class PydanticDefaultChecker(ast.NodeVisitor):
                 node.lineno,
                 node.col_offset,
                 f"PF001 Field '{node.target.id}' should use 'default=None' for optional fields",
+                type(self),
+            )
+        )
+
+    def error_datetime(self, node: ast.AnnAssign):
+        self.issues.append(
+            (
+                node.lineno,
+                node.col_offset,
+                f"PF003 Field '{node.target.id}' should use 'AwareDatetimeWithDefault' instead of datetime",
                 type(self),
             )
         )
@@ -102,7 +113,7 @@ class PydanticDefaultChecker(ast.NodeVisitor):
         #     # No arguments provided, defaulting to required field check
         #     self.error_no_ellipsis(node)
 
-    def check_field(self, node: ast.AnnAssign) -> None:
+    def check_PF001_default_equals(self, node: ast.AnnAssign) -> None:
         """Check fields to see if they match our default/ellipsis criteria
 
         Parameters
@@ -159,6 +170,20 @@ class PydanticDefaultChecker(ast.NodeVisitor):
                     else:
                         # Required fields should have the ellipsis in Field
                         self.error_no_ellipsis(node)
+
+    def check_PF003_aware_datetime(self, node: ast.AnnAssign) -> None:
+        """Check that all datetime usage is replaced with AwareDatetimeWithDefault
+
+        Parameters
+        ----------
+        node : ast.AnnAssign
+            Node to check
+        """
+
+        # check to see if the type of this assignment is set to datetime
+        type_annotation = node.annotation
+        if hasattr(type_annotation, 'id') and type_annotation.id == "datetime":
+            self.error_datetime(node)
 
 
 def run_ast_checks(
